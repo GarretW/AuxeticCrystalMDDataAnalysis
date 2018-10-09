@@ -22,90 +22,34 @@ reg = regr(y,m,tau);        % Optimized regressor
 
 cpi = m*tau;                % Compression index
 
-%% 
+%% Monty Carlo Method: Max Ent Critical Point Determination
 
 nb = 4;                         % Number of bins
 ncp = nb+1;                     % Number of critical points
 
-% sym = symbs(reg,xc,cpi);
+conv = false;                   % Convergence flag
+max_ent = 0;                    % Maximum entropy preallocation
+max_cp = zeros(1,ncp);
 
-nb = 1;
-ent = 0;
-ent0 = 1;
-con = false;
+while conv == false
 
-while con == false
-    nb = nb+1;
-    c = kmeans(reg',nb);
-    b = sort(c,'ascend');
-    [~,~,ind] = unique(b);
-    cnt = accumarray(ind,1);
-    
-    for j = 1:nb
-        ent = ent - ((cnt(j)/yl) * log(cnt(j)/yl));
-    end
-    
-    if abs(ent-ent0) <= tol
-        con = true;
-    end
-    
-    ent0 = ent;
-    
+        xc = sort(randi(yl,[ncp,1]));
+        xc(1) = 1; xc(end) = yl;
+        tmp_ent = cgment(y,reg,xc,cpi);        
+
+        if tmp_ent > max_ent
+            
+            if abs(tmp_ent - max_ent) <= .01
+                conv = true;      
+            end
+            
+            max_ent = tmp_ent;
+            max_cp = xc;            
+        end                    
 end
 
 
-%%
-% conv = false;
-% ent = 0;
-% while conv == false
-% 
-%         xc = sort(randi(yl,[ncp,1]));
-%         xc(1) = 1; xc(end) = yl;
-%         tmp_ent = cgment(y,reg,xc,cpi);        
-% 
-%         if tmp_ent > ent
-%             
-%             if abs(tmp_ent - ent) <= .01
-%                 conv = true;      
-%             end
-%             
-%             ent = tmp_ent;
-%             cmax = xc;            
-%         end         
-%             
-% end
-
-%%
-% for i = 1:5000   
-%     for j = 4:8
-%
-%         ncp = j;
-%         xc = sort(randi(yl,[ncp,1]));
-%         xc(1) = 1; xc(end) = yl;
-%         ent(j-3,i) = cgment(y,reg,xc,cpi);         
-%          
-%         if ent(j-3,i) > tmp_ent
-%             tmp_ent = ent(j-3,i);
-%             cmax(j-3,1:length(xc)) = xc;
-%
-%         end                 
-%     end
-% end
-%%
-% figure
-% for i = 1:10   
-%     plot(ent(i,:));
-%     hold on
-% end
-% legend('show');
-% hold off
-%%
-
-
-
-
-
-
+%% Genetic Algorithm Method: Max Ent Critical Point Determination
 
 % inA = diag(ones(ncp,1)) + diag(ones(ncp-1,1)*-1,1);
 % inA(end,1) = -1;
