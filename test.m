@@ -15,7 +15,7 @@ if strcmp(set,'act')
 elseif strcmp(set,'seg')
     load('s10')
     angs = angs{1};
-    y = angs(1,5001:8000);
+    y = angs(1,5001:7000);
     
 elseif strcmp(set,'osc')    
     x = 0.1:.01:6*pi;
@@ -66,52 +66,54 @@ cpi = m*tau;                % Compression index
 
 
 %%
-mci = 100;             % Monte Carlo iterations
+mci = 100;              % Monte Carlo iterations
 ncp = 3;                % Number of critical points
-ent = zeros(1,mci);     % Entropy vector
+% ent = zeros(1,mci);     % Entropy vector
 xc = zeros(ncp,mci);    % Critical point solution vector 
 
 max_ent = zeros(1,10);
 hld = zeros(10);
 %max_xc = zeros(10);
-for k = 1:20
-    for j = 3:10                
-        
-        for i = 1:mci*k
+
+for k = 1:10                     % Iteration multiplyer
+    for j = 3:10                % Crit point count
+        ent = zeros(1,mci*k);
+        for i = 1:mci*k         % MC search
             
-            tmp_xc = sort(randi(yl,[ncp,1]));
+            tmp_xc = sort(randi(yl,[j,1])); % Generate j random crit points
             tmp_xc(1) = 1; tmp_xc(end) = yl;
-            ent(i) = cgment(y,reg,tmp_xc,cpi);
-            xc(:,i) = tmp_xc;
+            ent(i) = cgment(y,reg,tmp_xc,cpi);  % Calculate entropy for solution and store
+            %xc(:,i) = tmp_xc;
             
         end               
-        max_ent(j) = max(ent);
+        max_ent(j) = max(ent);      % Store maximum entropy from best solution of j crit points
         %a = xc(max(ent) == ent);
         %max_xc(1:j,j) = a(1);
     end
-    hld(:,j) = max_ent;
+    hld(:,k) = max_ent;
+end
+
+%% Brute Force Method
+bf_xc = [1, 0, yl];
+bf_ent = zeros(1,yl-2);
+
+for i = 2:yl-1
+    bf_xc(2) = i;
+    bf_ent(i-1) = cgment(y,reg,bf_xc,cpi);
 end
 
 %% Plotting Worspace
 
-% figure
-% for i = 1:size(max_ent,1)
-%     hold on
-%     plot(max_ent(i,:));
-% end
-%
-% hold on
-% plot(mean(max_ent),'--k','LineWidth',3);
-% hold off
-
-%% Brute Force Method
-% bf_xc = [1, 0, yl];
-% bf_ent = zeros(1,yl-2);
-% 
-% for i = 2:yl-1
-%     bf_xc(2) = i;
-%     bf_ent(i-1) = cgment(y,reg,bf_xc,cpi);
-% end
+figure
+for i = 3:10
+    hold on
+    plot(hld(i,:));
+end
+hold on
+xlabel('Iterations (hundreds)')
+ylabel('Entropy');
+legend({'critical points = 3','critical points = 4','critical points = 5','critical points = 6'...
+    'critical points = 7','critical points = 8','critical points = 9','critical points = 10'},'Location','South');
 
 %% Genetic Algorithm Method: Max Ent Critical Point Determination
 
