@@ -5,7 +5,7 @@ clear; close all;
 %   seg: Segment, partition of actual, centrally located 3000 time steps
 %   osc: Oscillator, logarithmic oscillating function
 
-set = 'seg';
+set = 'act';
 
 if strcmp(set,'act')
     load('s10');
@@ -66,49 +66,52 @@ cpi = m*tau;                % Compression index
 
 
 %%
-mci = 5000;             % Monte Carlo iterations
+mci = 100;             % Monte Carlo iterations
 ncp = 3;                % Number of critical points
-% ent = zeros(1,mci);   % Entropy vector
-% xc = zeros(ncp,mci);  % Critical point solution vector 
+ent = zeros(1,mci);     % Entropy vector
+xc = zeros(ncp,mci);    % Critical point solution vector 
 
-max_ent = zeros(3,10);
-
-for k = 1:size(max_ent,1)
-    for j = 1:5
-        ent = zeros(1,1000*j);
-        xc = zeros(ncp,1000*j);
+max_ent = zeros(1,10);
+hld = zeros(10);
+%max_xc = zeros(10);
+for k = 1:20
+    for j = 3:10                
         
-        for i = 1:1000*j
+        for i = 1:mci*k
             
             tmp_xc = sort(randi(yl,[ncp,1]));
             tmp_xc(1) = 1; tmp_xc(end) = yl;
             ent(i) = cgment(y,reg,tmp_xc,cpi);
             xc(:,i) = tmp_xc;
             
-        end
-        
-        max_ent(k,j) = max(ent);
-        
+        end               
+        max_ent(j) = max(ent);
+        %a = xc(max(ent) == ent);
+        %max_xc(1:j,j) = a(1);
     end
+    hld(:,j) = max_ent;
 end
+
 %% Plotting Worspace
 
-figure
-for i = 1:size(max_ent,1)
-    hold on
-    plot(max_ent(i,:));
-end
-hold on
-plot(mean(max_ent),'--k','LineWidth',3);
-hold off
-
-
+% figure
+% for i = 1:size(max_ent,1)
+%     hold on
+%     plot(max_ent(i,:));
+% end
+%
+% hold on
+% plot(mean(max_ent),'--k','LineWidth',3);
+% hold off
 
 %% Brute Force Method
-
-for i = 2:yl-1
-   %... 
-end
+% bf_xc = [1, 0, yl];
+% bf_ent = zeros(1,yl-2);
+% 
+% for i = 2:yl-1
+%     bf_xc(2) = i;
+%     bf_ent(i-1) = cgment(y,reg,bf_xc,cpi);
+% end
 
 %% Genetic Algorithm Method: Max Ent Critical Point Determination
 
