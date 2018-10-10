@@ -15,7 +15,7 @@ if strcmp(set,'act')
 elseif strcmp(set,'seg')
     load('s10')
     angs = angs{1};
-    y = angs(1,5001:7000);
+    y = angs(1,5001:8000);
     
 elseif strcmp(set,'osc')    
     x = 0.1:.01:6*pi;
@@ -66,17 +66,17 @@ cpi = m*tau;                % Compression index
 
 
 %%
-mci = 100;              % Monte Carlo iterations
+mci = 10;              % Monte Carlo iterations
 ncp = 3;                % Number of critical points
 % ent = zeros(1,mci);     % Entropy vector
 xc = zeros(ncp,mci);    % Critical point solution vector 
 
-max_ent = zeros(1,10);
-hld = zeros(10);
+max_ent = zeros(1,15);
+hld = zeros(15);
 %max_xc = zeros(10);
 
 for k = 1:10                     % Iteration multiplyer
-    for j = 3:10                % Crit point count
+    for j = 3:15                % Crit point count
         ent = zeros(1,mci*k);
         for i = 1:mci*k         % MC search
             
@@ -105,15 +105,22 @@ end
 %% Plotting Worspace
 
 figure
-for i = 3:10
+for i = 3:15
     hold on
-    plot(hld(i,:));
+    plot(hld(i,1:10));
 end
 hold on
-xlabel('Iterations (hundreds)')
+xlabel('Iteration multiplier')
 ylabel('Entropy');
-legend({'critical points = 3','critical points = 4','critical points = 5','critical points = 6'...
-    'critical points = 7','critical points = 8','critical points = 9','critical points = 10'},'Location','South');
+
+%% Notes
+% Delta average across increasing cp
+% Variances across increasing cp
+% Behaviour at low number of iterations
+
+% Search for entropy maxima or plateau across increasing bins at set
+% iterations. 
+
 
 %% Genetic Algorithm Method: Max Ent Critical Point Determination
 
