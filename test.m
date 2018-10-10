@@ -35,7 +35,6 @@ conv = false;                   % Convergence flag
 max_ent = 0;                    % Maximum entropy preallocation
 max_cp = zeros(1,ncp);
 
-
 while conv == false
 
         xc = sort(randi(yl,[ncp,1]));
@@ -53,8 +52,21 @@ while conv == false
         end                    
 end
 
-%%
 
+%%
+mci = 5000;         % Monte Carlo iterations
+ncp = 4;            % Number of critical points
+ent = zeros(1,mci); % Entropy vector
+xc = zeros(ncp,mci);
+for i = 1:mci 
+
+        
+        tmp_xc = sort(randi(yl,[ncp,1]));
+        tmp_xc(1) = 1; tmp_xc(end) = yl;
+        ent(i) = cgment(y,reg,tmp_xc,cpi);
+        xc(:,i) = tmp_xc;
+                   
+ end
 
 %% Genetic Algorithm Method: Max Ent Critical Point Determination
 
