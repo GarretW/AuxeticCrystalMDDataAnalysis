@@ -1,27 +1,39 @@
 clear; close all;
 
-mode = 'oscillate';
+% Data series setting
+%   act: Actual, full length MD simulation time series
+%   seg: Segment, partition of actual, centrally located 3000 time steps
+%   osc: Oscillator, logarithmic oscillating function
 
-if strcmp(mode,'actual')
+set = 'seg';
+
+if strcmp(set,'act')
     load('s10');
     angs = angs{1};
-    ns = size(angs,1);
-    y = angs(1,:);    
+    y = angs(1,:);
     
-elseif strcmp(mode,'oscillate')    
+elseif strcmp(set,'seg')
+    load('s10')
+    angs = angs{1};
+    y = angs(1,5001:8000);
+    
+elseif strcmp(set,'osc')    
     x = 0.1:.01:6*pi;
     y = log(1/pi*x).*sin(20*x);
     
 end
 
-%%
+%% Thresholds and Characteristics
+
 yl = length(y);             
 
-tol = 1e-4;                 % General convergence tolerance
-r = 12;                     % FNN threshold
+thr = 1e-4;                 % General convergence threshold
+r = 12;                     % FNN ratio threshold
 
-tau = optau(y,tol);         % Time lag
-m = opdim(y,tau,r,tol);     % Embedding dimension
+%% Regressor Mutual Information Characterization
+
+tau = optau(y,thr);         % Time lag
+m = opdim(y,tau,r,thr);     % Embedding dimension
 reg = regr(y,m,tau);        % Optimized regressor
 
 cpi = m*tau;                % Compression index
@@ -55,14 +67,14 @@ cpi = m*tau;                % Compression index
 
 %%
 mci = 5000;             % Monte Carlo iterations
-ncp = 5;                % Number of critical points
+ncp = 3;                % Number of critical points
 % ent = zeros(1,mci);   % Entropy vector
 % xc = zeros(ncp,mci);  % Critical point solution vector 
 
 max_ent = zeros(3,10);
 
 for k = 1:size(max_ent,1)
-    for j = 1:20
+    for j = 1:5
         ent = zeros(1,1000*j);
         xc = zeros(ncp,1000*j);
         
@@ -79,7 +91,7 @@ for k = 1:size(max_ent,1)
         
     end
 end
-%%
+%% Plotting Worspace
 
 figure
 for i = 1:size(max_ent,1)
@@ -89,6 +101,14 @@ end
 hold on
 plot(mean(max_ent),'--k','LineWidth',3);
 hold off
+
+
+
+%% Brute Force Method
+
+for i = 2:yl-1
+   %... 
+end
 
 %% Genetic Algorithm Method: Max Ent Critical Point Determination
 
