@@ -5,7 +5,7 @@ clear; close all;
 %   seg: Segment, partition of actual, centrally located 3000 time steps
 %   osc: Oscillator, logarithmic oscillating function
 
-set = 'act';
+set = 'seg';
 
 if strcmp(set,'act')
     load('s10');
@@ -66,54 +66,64 @@ cpi = m*tau;                % Compression index
 
 
 %%
-mci = 10;              % Monte Carlo iterations
+mci = 50;              % Monte Carlo iterations
 ncp = 3;                % Number of critical points
 % ent = zeros(1,mci);     % Entropy vector
 xc = zeros(ncp,mci);    % Critical point solution vector 
 
-max_ent = zeros(1,15);
-hld = zeros(15);
-%max_xc = zeros(10);
+max_ent = zeros(1,ncp);
+hld = zeros(10,300);
+% max_xc = zeros(10);
 
-for k = 1:10                     % Iteration multiplyer
-    for j = 3:15                % Crit point count
-        ent = zeros(1,mci*k);
-        for i = 1:mci*k         % MC search
+
+%for k = 1:10                                                  % Iteration multiplier
+    for j = 3:300                                               % Crit point count
+        ent = zeros(1,mci);
+        
+        for i = 1:mci                                           % MC search
             
-            tmp_xc = sort(randi(yl,[j,1])); % Generate j random crit points
+            tmp_xc = sort(randi(yl,[j,1]));                     % Generate j random crit points
             tmp_xc(1) = 1; tmp_xc(end) = yl;
-            ent(i) = cgment(y,reg,tmp_xc,cpi);  % Calculate entropy for solution and store
-            %xc(:,i) = tmp_xc;
+            ent(i) = cgment(y,reg,tmp_xc,cpi);                  % Calculate entropy for solution and store
+%            xc(:,i) = tmp_xc;
             
         end               
-        max_ent(j) = max(ent);      % Store maximum entropy from best solution of j crit points
-        %a = xc(max(ent) == ent);
-        %max_xc(1:j,j) = a(1);
+        max_ent(j) = max(ent);                                  % Store maximum entropy from best solution of j crit points
+%        a = xc(max(ent) == ent);                               % Store maximum entropy critical point index solutions 
+%        max_xc(1:j,j) = a(1);
+
+        clc;
+        fprintf('cpn: %0.f ',j);
+        
+
     end
-    hld(:,k) = max_ent;
-end
+    fprintf('\n');
+
+    
+%    hld(k,:) = max_ent;            
+
+%end
 
 %% Brute Force Method
-bf_xc = [1, 0, yl];
-bf_ent = zeros(1,yl-2);
-
-for i = 2:yl-1
-    bf_xc(2) = i;
-    bf_ent(i-1) = cgment(y,reg,bf_xc,cpi);
-end
+% bf_xc = [1, 0, yl];
+% bf_ent = zeros(1,yl-2);
+% 
+% for i = 2:yl-1
+%     bf_xc(2) = i;
+%     bf_ent(i-1) = cgment(y,reg,bf_xc,cpi);
+% end
 
 %% Plotting Worspace
 
 figure
-for i = 3:15
-    hold on
-    plot(hld(i,1:10));
-end
 hold on
-xlabel('Iteration multiplier')
+plot((3:300),max_ent(1,3:end));
+hold on
+xlabel('Numner Critical Points')
 ylabel('Entropy');
 
 %% Notes
+
 % Delta average across increasing cp
 % Variances across increasing cp
 % Behaviour at low number of iterations
