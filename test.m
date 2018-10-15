@@ -66,43 +66,47 @@ cpi = m*tau;                % Compression index
 
 
 %%
-mci = 50;              % Monte Carlo iterations
+mci = 5;              % Monte Carlo iterations
 ncp = 3;                % Number of critical points
 % ent = zeros(1,mci);     % Entropy vector
 xc = zeros(ncp,mci);    % Critical point solution vector 
 
 max_ent = zeros(1,ncp);
-hld = zeros(10,300);
-% max_xc = zeros(10);
 
+mcp = 150;
+cval = zeros(10,mcp);                                           % Target fit coefficients 
 
-%for k = 1:10                                                  % Iteration multiplier
-    for j = 3:300                                               % Crit point count
+for k = 1:10                                                    % Test multiplier    
+    for j = 3:mcp                                               % Crit point count
         ent = zeros(1,mci);
         
-        for i = 1:mci                                           % MC search
+        for i = 1:mci*k                                           % MC search
             
             tmp_xc = sort(randi(yl,[j,1]));                     % Generate j random crit points
             tmp_xc(1) = 1; tmp_xc(end) = yl;
             ent(i) = cgment(y,reg,tmp_xc,cpi);                  % Calculate entropy for solution and store
-%            xc(:,i) = tmp_xc;
+            % xc(:,i) = tmp_xc;
             
-        end               
+        end
+        
         max_ent(j) = max(ent);                                  % Store maximum entropy from best solution of j crit points
-%        a = xc(max(ent) == ent);                               % Store maximum entropy critical point index solutions 
-%        max_xc(1:j,j) = a(1);
-
+        % a = xc(max(ent) == ent);                              % Store maximum entropy critical point index solutions
+        % max_xc(1:j,j) = a(1);
+        
         clc;
         fprintf('cpn: %0.f ',j);
-        
-
+                
     end
-    fprintf('\n');
-
+    fprintf('\nDone: %0.f\n', k);
     
-%    hld(k,:) = max_ent;            
+    for o = 6:mcp
+        tmp_c = coeffvalues(fit((3:o)',max_ent(3:o)','poly2'));
+        cval(k,o) = tmp_c(3);
+        
+    end
+    
+end
 
-%end
 
 %% Brute Force Method
 % bf_xc = [1, 0, yl];
@@ -116,11 +120,30 @@ hld = zeros(10,300);
 %% Plotting Worspace
 
 figure
+for i = 1:10 
+    hold on
+    subplot(2,1,1)
+    plot(cval(i,3:end))
+    
+    hold on
+    subplot(2,1,2)
+    plot(diff(cval(i,3:end)))
+    
+end
+hold on 
+subplot(2,1,2)
+plot(.01*ones(1,mcp-3),'-k','LineWidth',2);
 hold on
-plot((3:300),max_ent(1,3:end));
+subplot(2,1,1)
+xlabel('Included critical points')
+ylabel('C coeff')
+title('Maximum entropy fit analysis')
+
 hold on
-xlabel('Numner Critical Points')
-ylabel('Entropy');
+subplot(2,1,2)
+xlabel('Included critical points')
+ylabel('delta C coeff')
+title('Convergence')
 
 %% Notes
 
@@ -131,6 +154,7 @@ ylabel('Entropy');
 % Search for entropy maxima or plateau across increasing bins at set
 % iterations. 
 
+%Curve fitting power 2 constant convergence? 
 
 %% Genetic Algorithm Method: Max Ent Critical Point Determination
 
