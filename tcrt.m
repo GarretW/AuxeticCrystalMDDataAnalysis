@@ -19,9 +19,9 @@ yl = length(y);
 
 y = sort(y,'ascend');
 
-if strcmp(slct,'rnd')    
+if strcmp(slct,'rnd')
     
-    r = sort(randi(yl,1,n),'ascend');
+    r = sort(randi([1 yl],[1 n]),'ascend');
     xc = y(r);
     xc(1) = y(1); xc(end) = y(end);
     
