@@ -39,63 +39,58 @@ reg = regr(y,m,tau);        % Optimized regressor
 cpi = m*tau;                % Compression index
 
 %%
+ncp = 15;
+it0 = 5000;
+trials = 3;
+ent = zeros(trials,ncp);
 
-ent = zeros(1,50);
+for j = 1:trials
+    for i = 1:ncp
+        
+        e = mcxc(y,reg,i,it0,cpi);
+        ent(j,i) = max(e);
+        clc;
+        fprintf('cp: %0.f \n',i);
+    end
+    fprintf('Run %0.f Done \n',j)
+end
+clc;
 
-for i = 3:50
+%% Curve Fitting Analysis
+
+cval = zeros(trials,ncp);
+
+for j = 1:trials    
+    coeffs = zeros(3,ncp);
+    [fitc,~] = fit((1:3)',ent(j,1:3)','power2');
     
-    e = mcxc(y,reg,i,50,cpi);
-    ent(i) = max(e);
+    for i = 4:ncp            
+        coeffs(:,i) = [fitc.a; fitc.b; fitc.c];
+        fopt = fitoptions('power2', 'StartPoint', coeffs(:,i));        
+        [fitc,~] = fit((1:i)', ent(j,1:i)', 'power2', fopt);
+
+    end
+    cval(j,:) = coeffs(3,:);
     
 end
 
 
 
-%% Curve Fitting Analysis
-
-%fopt = fitoptions('power2','Lower',[-Inf,-Inf,0],'Upper',[Inf,0,Inf]);
-
-% cv = zeros(1,100);
-% bv = cv;
-% rsq = cv;
-% 
-% for i = 6:60    
-%     [coef,r] = fit((3:i)',max_ent(3:i)','power2');
-%     cv(i) = coef.c;
-%     rsq(i) = r.rsquare;
-%     bv(i) = coef.b;
-%     clc;
-%     disp(i);
-% end
-
 %% Plotting Worspace
 
-% figure
-% for i = 1:10 
-%     hold on
-%     subplot(2,1,1)
-%     plot(cval(i,3:end))
-%     
-%     hold on
-%     subplot(2,1,2)
-%     plot(diff(cval(i,3:end)))
-%      
-% end
-% 
-% hold on 
-% subplot(2,1,2)
-% %plot(.01*ones(1,mcp-3),'-k');
-% hold on
-% subplot(2,1,1)
-% xlabel('Included critical points')
-% ylabel('C coeff')
-% title('Maximum entropy fit analysis')
-% 
-% hold on
-% subplot(2,1,2)
-% xlabel('Included critical points')
-% ylabel('delta C coeff')
-% title('Convergence')
+figure;
+for i = 1:trials
+    hold on
+    plot(cval(i,:));
+    
+end
+
+figure;
+for i = 1:trials
+    hold on
+    plot(ent(i,:));
+    
+end
 
 %% Notes
 

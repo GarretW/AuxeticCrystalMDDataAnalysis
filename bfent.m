@@ -1,4 +1,4 @@
-function [ent,xc] = bfent(y,ncp)
+function [ent,xc] = bfent(y)
 %% BFENT Brute Force Entropy
 
 
