@@ -5,7 +5,7 @@ function ent = genent(prb)
 ent = 0;
 
 for i = 1:length(prb)
-    ent = ent - (prb * log(prb));
+    ent = ent - (prb(i)*log(prb(i)));
 end
 
 

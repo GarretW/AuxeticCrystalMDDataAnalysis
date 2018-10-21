@@ -22,7 +22,7 @@ reg = zeros(m,nt);
 % points are set to zero.
 
 for i = (m*tau)+1:nt      
-     reg(:,i) = flip(y(i-m*tau:tau:i-tau));    
+    reg(:,i) = y(i-tau:-tau:i-(m*tau));    
 end
 
 end

@@ -5,7 +5,7 @@ clear; close all;
 %   seg: Segment, partition of actual, centrally located 3000 time steps
 %   osc: Oscillator, logarithmic oscillating function
 
-set = 'seg';
+set = 'act';
 
 if strcmp(set,'act')
     fid = open(strcat(pwd,'/Wsdat/s10.mat'));
@@ -36,6 +36,7 @@ m = opdim(y,tau,r,thr);     % Embedding dimension
 reg = regr(y,m,tau);        % Optimized regressor
 cpi = m*tau;                % Compression index
 
+%% Ordinal Permutation
 
 [per,prb] = ordin(reg,cpi);
 %% Notes
