@@ -5,7 +5,7 @@ clear; close all;
 %   seg: Segment, partition of actual, centrally located 3000 time steps
 %   osc: Oscillator, logarithmic oscillating function
 
-set = 'act';
+set = 'seg';
 
 if strcmp(set,'act')
     fid = open(strcat(pwd,'/Wsdat/s10.mat'));
@@ -37,6 +37,7 @@ reg = regr(y,m,tau);        % Optimized regressor
 cpi = m*tau;                % Compression index
 
 
+[per,prb] = ordin(reg,cpi);
 %% Notes
 
 % Pursue Bandt-Pompf method 
