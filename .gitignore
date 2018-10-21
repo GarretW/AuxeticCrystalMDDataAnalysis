@@ -1,8 +1,10 @@
 # Excluded dataset files
+*.mat
+*.DS_Store
 
-s10.mat
-angdat.mat
-.DS_Store
+# Excluded directories
+/Wsdat/
+/Obsolete/
 
 
 # Excluded runtime files
