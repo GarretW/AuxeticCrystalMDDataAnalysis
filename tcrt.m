@@ -10,23 +10,20 @@ function[xc] = tcrt(y,n,slct)
 %       slct: Selector string. 'rnd for random, 'lin' for linear.
 %OUTPUT:
 %       xc: Length n vector of critical points including bounds.
-
-yl = length(y);
+%%
 
 ubnd = max(y);              % Boundary values of series
 lbnd = min(y);
 xc = zeros(1,n);            % Critical point preallocation
+yl = length(y);
 
-if size(y,1) > 1
-    y = reshape(y,[numel(y),1]);
-end
-%% Broken %%
-if strcmp(slct,'rnd')    
+y = sort(y,'ascend');
+
+if strcmp(slct,'rnd')
     
-    
-    r = sort((randi([2,yl-1],[1,n-2])),'ascend');
-    s = unique(y);
-    xc = [lbnd,s(r),ubnd];
+    r = sort(randi([1 yl],[1 n]),'ascend');
+    xc = y(r);
+    xc(1) = y(1); xc(end) = y(end);
     
 elseif strcmp(slct,'lin')
     

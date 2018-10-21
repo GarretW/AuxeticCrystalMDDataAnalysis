@@ -5,7 +5,7 @@ clear; close all;
 %   seg: Segment, partition of actual, centrally located 3000 time steps
 %   osc: Oscillator, logarithmic oscillating function
 
-set = 'seg';
+set = 'act';
 
 if strcmp(set,'act')
     load('s10');
@@ -38,92 +38,67 @@ reg = regr(y,m,tau);        % Optimized regressor
 
 cpi = m*tau;                % Compression index
 
-%% Monty Carlo Method: Max Ent Critical Point Determination
+%% 
+ncp = 30;
+it0 = 10000;
+trials = 5;
+ent = zeros(trials,ncp);
 
-% nb = 4;                         % Number of bins
-% ncp = nb+1;                     % Number of critical points
-% 
-% conv = false;                   % Convergence flag
-% max_ent = 0;                    % Maximum entropy preallocation
-% max_cp = zeros(1,ncp);
-% 
-% while conv == false
-% 
-%         xc = sort(randi(yl,[ncp,1]));
-%         xc(1) = 1; xc(end) = yl;
-%         tmp_ent = cgment(y,reg,xc,cpi);        
-% 
-%         if tmp_ent > max_ent
-% 
-%             if abs(tmp_ent - max_ent) <= .01
-%                 conv = true;      
-%             end
-% 
-%             max_ent = tmp_ent;
-%             max_cp = xc;            
-%         end                    
-% end
-
-
-%%
-mci = 5000;             % Monte Carlo iterations
-ncp = 3;                % Number of critical points
-% ent = zeros(1,mci);   % Entropy vector
-% xc = zeros(ncp,mci);  % Critical point solution vector 
-
-max_ent = zeros(3,10);
-
-for k = 1:size(max_ent,1)
-    for j = 1:5
-        ent = zeros(1,1000*j);
-        xc = zeros(ncp,1000*j);
+for j = 1:trials
+    for i = 1:ncp
         
-        for i = 1:1000*j
-            
-            tmp_xc = sort(randi(yl,[ncp,1]));
-            tmp_xc(1) = 1; tmp_xc(end) = yl;
-            ent(i) = cgment(y,reg,tmp_xc,cpi);
-            xc(:,i) = tmp_xc;
-            
-        end
+        e = mcxc(y,reg,i,it0,cpi);
+        ent(j,i) = max(e);
         
-        max_ent(k,j) = max(ent);
-        
+        clc;
+        fprintf('cp: %0.f',i);
     end
+    fprintf('\nRun %0.f Done\n',j)
 end
+
+
+%% Curve Fitting Analysis
+
+cval = zeros(trials,ncp);
+
+for j = 1:trials    
+    coeffs = zeros(3,ncp);
+    [fitc,~] = fit((1:3)',ent(j,1:3)','power2');
+    
+    for i = 4:ncp            
+        coeffs(:,i) = [fitc.a; fitc.b; fitc.c];
+        fopt = fitoptions('power2', 'StartPoint', coeffs(:,i));        
+        [fitc,~] = fit((1:i)', ent(j,1:i)', 'power2', fopt);
+
+    end
+    cval(j,:) = coeffs(3,:);
+    
+end
+
+
+
 %% Plotting Worspace
 
-figure
-for i = 1:size(max_ent,1)
+figure;
+for i = 1:trials
     hold on
-    plot(max_ent(i,:));
-end
-hold on
-plot(mean(max_ent),'--k','LineWidth',3);
-hold off
-
-
-
-%% Brute Force Method
-
-for i = 2:yl-1
-   %... 
+    plot(cval(i,:));
+    
 end
 
-%% Genetic Algorithm Method: Max Ent Critical Point Determination
+figure;
+for i = 1:trials
+    hold on
+    plot(ent(i,:));
+    
+end
 
-% inA = diag(ones(ncp,1)) + diag(ones(ncp-1,1)*-1,1);
-% inA(end,1) = -1;
-% inB = zeros(ncp,1);
-%
-% eqA = zeros(ncp);
-% eqA(1) = 1; eqA(end) = 1;
-% eqB = zeros(ncp,1);
-% eqB(1) = min(y); eqB(end) = max(y);
-%
-% bndu = ones(1,ncp)*max(y);         % Upper and lower boundary conditions
-% bndl = ones(1,ncp)*min(y);
-%
-% opfn = @(u) -cgment(reg,u,cpi);
-% oxc = ga(tst,ncp,idA,idB,[],[],[],ubnd);
+%% Notes
+
+% Search for entropy maxima or plateau across increasing bins at set
+% iterations. 
+
+% Power2 analytic solution to brute force?
+% Ordinal entropy, across multiple time series. 
+
 
