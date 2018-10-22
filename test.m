@@ -41,10 +41,19 @@ cpi = m*tau;                % Compression index
 [per,prb] = ordin(reg,cpi);
 %% Notes
 
-% Pursue Bandt-Pompf method 
-% Ordinal entropy, across multiple time series. 
+% 10/21: 
+%       Pursue Bandt-Pompf method 
 
-% Possibly abandon symbolization and curve fitting.
+% 10/22: 
+%   Use FNN regressor vector motif [Y(t-tau),Y(t-tau*2)...,Y(t-(tau*d))] 
+%       for embedding dimension optimization.
+%   Use BP regressor vector motif [Y(t),Y(t-tau),...,Y(t-(tau*d-1))] for
+%       generation of regressor matrix. 
+        
+
+% No log
+%   Ordinal entropy, across multiple time series. 
+%   Possibly abandon symbolization and curve fitting.
 
 
 
