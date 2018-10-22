@@ -5,7 +5,7 @@ clear; close all;
 %   seg: Segment, partition of actual, centrally located 3000 time steps
 %   osc: Oscillator, logarithmic oscillating function
 
-set = 'act';
+set = 'seg';
 
 if strcmp(set,'act')
     fid = open(strcat(pwd,'/Wsdat/s10.mat'));
@@ -33,12 +33,13 @@ r = 12;                     % FNN ratio threshold
 
 tau = optau(y,thr);         % Time lag
 m = opdim(y,tau,r,thr);     % Embedding dimension
-reg = regr(y,m,tau);        % Optimized regressor
+reg = regr(y,m,tau,'FNN');        % Optimized regressor
 cpi = m*tau;                % Compression index
 
 %% Ordinal Permutation
 
 [per,prb] = ordin(reg,cpi);
+ent = genent(prb);
 %% Notes
 
 % 10/21: 

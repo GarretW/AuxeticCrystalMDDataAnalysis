@@ -13,10 +13,10 @@ function [fnn] = fnnp(ts,m,tau,r)
 %       d: Nearest euclidean neighbor and corresponding norm.
 
 nt = length(ts);
-reg = regr(ts,m,tau);   % Builds regressor from time series, given embed dim and time lag.
+reg = regr(ts,m,tau,'FNN');   % Builds regressor from time series, given embed dim and time lag.
 
-d = ones(2,nt);         % Index of minimum regressor norm neighbor and value of minimum norm.
-nf = 0;                 % Number of points with false neighbors.
+d = ones(2,nt);               % Index of minimum regressor norm neighbor and value of minimum norm.
+nf = 0;                       % Number of points with false neighbors.
 
 %thr = zeros(1,nt);     % Threshold ratio of future value vs regessor prediction.
 
