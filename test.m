@@ -1,45 +1,63 @@
 clear; close all;
 
+
+
 % Data series setting
-%   act: Actual, full length MD simulation time series
-%   seg: Segment, partition of actual, centrally located 3000 time steps
-%   osc: Oscillator, logarithmic oscillating function
+%   LP: L-Pattern.
+%   CM: Cross matrix.
 
-set = 'seg';
+data = 'LP';
 
-if strcmp(set,'act')
-    fid = open(strcat(pwd,'/Wsdat/s10.mat'));
-    angs = fid.angs{1};
-    y = angs(1,:);
-    
-elseif strcmp(set,'seg')
-    fid = open(strcat(pwd,'/Wsdat/s10.mat'));
-    angs = fid.angs{1};
-    y = angs(1,5001:8000);
-    
-elseif strcmp(set,'osc')    
-    x = 0.1:.01:6*pi;
-    y = log(1/pi*x).*sin(20*x);
-    
+if strcmp(data,'CM')
+    fid = open(strcat(pwd,'/Wsdat/angdat3377.mat'));
+    angs = fid.angdat(2:end,2:end); 
+elseif strcmp(data,'LP')
+    fid = open(strcat(pwd,'/Wsdat/angdat121322.mat'));
+    angs = fid.angdat(2:end,2:end);
 end
+
+
 
 %% Thresholds and Characteristics
 
-yl = length(y);             
 thr = 1e-4;                 % General convergence threshold
 r = 12;                     % FNN ratio threshold
 
+
+%% 
+
+tgt = angs{1}(3001:8000);
+src = angs{2}(3001:8000);
+
+tau = optau(tgt,thr);
+m = opdim(tgt,tau,r,thr);
+cpi = m*tau;
+
+tgt_rg = regr(tgt,m,tau,'BP');
+src_rg = regr(src,m,tau,'BP');
+
+[tgt_org,tgt_spc] = ordin(tgt_rg,cpi);
+[src_org,src_spc] = ordin(src_rg,cpi);
+
+tgt_ps = pspace(tgt_spc,m);
+src_ps = pspace(src_spc,m);
+
+jnt_spc = 
+
+    
 %% Regressor Mutual Information Characterization
+% 
+% tau = optau(y,thr);             % Time lag
+% m = opdim(y,tau,r,thr);         % Embedding dimension
+% rg = regr(y,m,tau,'BP');        % Optimized regressor
+% cpi = m*tau;                    % Compression index
 
-tau = optau(y,thr);         % Time lag
-m = opdim(y,tau,r,thr);     % Embedding dimension
-reg = regr(y,m,tau,'FNN');        % Optimized regressor
-cpi = m*tau;                % Compression index
+%% Ordinal Permutations
 
-%% Ordinal Permutation
+% [org,octs,oprb] = ordin(rg,cpi);
 
-[per,prb] = ordin(reg,cpi);
-ent = genent(prb);
+
+
 %% Notes
 
 % 10/21: 
@@ -50,11 +68,10 @@ ent = genent(prb);
 %       for embedding dimension optimization.
 %   Use BP regressor vector motif [Y(t),Y(t-tau),...,Y(t-(tau*d-1))] for
 %       generation of regressor matrix. 
-        
 
-% No log
-%   Ordinal entropy, across multiple time series. 
-%   Possibly abandon symbolization and curve fitting.
+% 10/29:
+%   Play with m and tau effect on ordinal entropy
+%   End pursuit of curve fitting.
 
 
 
