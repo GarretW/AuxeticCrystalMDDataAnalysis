@@ -6,7 +6,7 @@ function [oreg,ospc] = ordin(reg,cpi)
 %       cpi: Compression index.
 %
 % OUTPUT:
-%       oreg: Ordinal regressor.
+%       oreg: Ordinal symbolized regressor.
 %       opc: Ordinal permutation space, corresponding counts and normalized 
 %             probabilities.
 %       
@@ -42,11 +42,12 @@ for i = cpi+1:yl
     per(i) = tmp;
 end
 
-w = sort(per(:,cpi+1:end),'ascend');
-[w,~,ind] = unique(w);
-wct = accumarray(ind,1);
+c = sort(per(:,cpi+1:end),'ascend');
+[c,~,ind] = unique(c);
+cnt = accumarray(ind,1);
 
-ospc = [sort(w,'ascend');wct';wct'/(yl-cpi)];
+ospc = [sort(c,'ascend');cnt';cnt'/(yl-cpi)];
+oreg = per;
 
 
 end % function ordin
