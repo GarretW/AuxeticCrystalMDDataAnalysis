@@ -7,10 +7,8 @@ function [oreg,ospc] = ordin(reg,cpi)
 %
 % OUTPUT:
 %       oreg: Ordinal symbolized regressor.
-%       opc: Ordinal permutation space, corresponding counts and normalized 
+%       ospc: Ordinal permutation space, corresponding counts and normalized 
 %             probabilities.
-%       
-%
 %
 
 
@@ -48,6 +46,5 @@ cnt = accumarray(ind,1);
 
 ospc = [sort(c,'ascend');cnt';cnt'/(yl-cpi)];
 oreg = per;
-
 
 end % function ordin

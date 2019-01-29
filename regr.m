@@ -23,20 +23,22 @@ function [reg] = regr(y,m,tau,set)
 nt = length(y);
 
 % Regressor Component Preallocation
-reg = zeros(m,nt);
 
 % Regressor extraction from raw data.
 % For regressor lags which exceede current time step in data, nonexistant
 % points are set to zero.
 
 if strcmp(set,'FNN')
+    reg = zeros(m,nt);
+
     for i = (m*tau)+1:nt      
         reg(:,i) = y(i-tau:-tau:i-(m*tau));    
     end
     
 elseif strcmp(set,'BP')
+    reg = zeros(m+1,nt);
     for i = (m*tau)+1:nt          
-        reg(:,i) = y(i:-tau:i-(m*tau-1));    
+        reg(:,i) = y(i:-tau:i-(m*tau));    
     end
     
 end

@@ -5,6 +5,6 @@
 # Excluded directories
 /Wsdat/
 /Obsolete/
-
+/Demos/
 
 # Excluded runtime files

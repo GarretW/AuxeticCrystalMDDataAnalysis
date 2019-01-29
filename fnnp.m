@@ -46,7 +46,8 @@ for k = m*tau:nt
     a = find(nrm == d(1,k));
     
     if numel(a) > 1
-        disp('Multiple Pts Detected');              
+        a = a(1);
+        %disp('Multiple Pts Detected');              
     end
     
     d(2,k) = a(1); 
