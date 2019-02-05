@@ -1,7 +1,17 @@
 function tau = fmim(ts,tol)
 %% FMIM First MI Minima
 % Calculates the first local minima of the auto mutual information of a time
-% series 
+%   series. Lag which produces a minima is returned as delay which yields
+%   a large addition of information to regressor. 
+%
+% INPUT: 
+%       ts:  Time series of analysis.
+%       tol: Convergence tolerance for max ent determination.
+%
+% OUTPUT:
+%       tau: Delay in time series which yields maximal addition of
+%            information.
+%%
 
 mfound = false;
 i = 1;

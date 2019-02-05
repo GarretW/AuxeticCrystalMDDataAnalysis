@@ -8,13 +8,13 @@ clear; close all;
 set = 'act';
 
 if strcmp(set,'act')
-    load('s10');
-    angs = angs{1};
+    fid = open(strcat(pwd,'/Wsdat/s10.mat'));
+    angs = fid.angs{1};
     y = angs(1,:);
     
 elseif strcmp(set,'seg')
-    load('s10')
-    angs = angs{1};
+    fid = open(strcat(pwd,'/Wsdat/s10.mat'));
+    angs = fid.angs{1};
     y = angs(1,5001:8000);
     
 elseif strcmp(set,'osc')    
@@ -26,7 +26,6 @@ end
 %% Thresholds and Characteristics
 
 yl = length(y);             
-
 thr = 1e-4;                 % General convergence threshold
 r = 12;                     % FNN ratio threshold
 
@@ -35,9 +34,9 @@ r = 12;                     % FNN ratio threshold
 tau = optau(y,thr);         % Time lag
 m = opdim(y,tau,r,thr);     % Embedding dimension
 reg = regr(y,m,tau);        % Optimized regressor
-
 cpi = m*tau;                % Compression index
 
+<<<<<<< HEAD
 %% 
 ncp = 30;
 it0 = 10000;
@@ -101,4 +100,17 @@ end
 % Power2 analytic solution to brute force?
 % Ordinal entropy, across multiple time series. 
 
+=======
+
+[per,prb] = ordin(reg,cpi);
+%% Notes
+
+% Pursue Bandt-Pompf method 
+% Ordinal entropy, across multiple time series. 
+
+% Possibly abandon symbolization and curve fitting.
+
+
+
+>>>>>>> ac2fc8b2e50027786689841698f000d05b830dd6
 
