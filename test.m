@@ -1,17 +1,17 @@
 clear; close all;
 
-
 %% Raw Data 
 % Data series setting
 %   Knight: Knight pattern.
 %   Cross: Cross matrix.
 
+% RESTRUCTURE FOR FULL DATA SET
 data = 'Knight';
 
 if strcmp(data,'Cross')
     fid = open(strcat(pwd,'/Wsdat/angdat3377.mat'));
     angs = fid.angdat(2:end,2:end); 
-elseif strcmp(data,'Knight')
+elseif strcmp(data,'Knight') 
     fid = open(strcat(pwd,'/Wsdat/angdat121322.mat'));
     angs = fid.angdat(2:end,2:end);
 elseif strcmp(data,'s10')
@@ -21,27 +21,52 @@ end
 
 %% Data Preprocessing
 
-tgt = angs{1}(3001:8000);
-src = angs{2}(3001:8000);
+tgt = angs{3}; %(3001:8000);
+src = angs{4}; %(3001:8000);
+
+a = (.001*pi:.001*pi:4*pi);
+b = ones(1,4000);
+
+% tgt = awgn(sin(a),45);
+% src = awgn(b,45);
 
 %% Thresholds and Characteristics
 
+disp('TC');
+
 thr = 1e-4;                 % General convergence threshold
 r = 12;                     % FNN ratio threshold
-nt = length(tgt);           % Number of data points
+nt = length(a);             % Number of data points
 
+disp('done');
 
-te_v = zeros(1,40);
-te_sd = zeros(1,40);
+% te_v = zeros(1,25);
+% te_sd = zeros(1,25);
 
-for i = 1:40
+% parfor i = 1:25
+
+tnsf = zeros(1,4);
+
+for i = 1:4
 %% Shuffling 
 
-tgt = tgt(randperm(nt));
-src = src(randperm(nt));
+% if i == 2
+% tgt = tgt(randperm(nt));
+% src = src(randperm(nt));
 
+tgt = awgn(sin(a),60);
+src = awgn(b,60);
 
+disp(i);
+plot(tgt);
+hold on
+plot(src);
+%pause;
+hold off
+%close all
 %% Regressor Characterization
+
+disp('Reg');
 
 % Target History
 tauh = optau(tgt,thr);
@@ -65,6 +90,8 @@ rgs = regr(src,ms,taus,'FNN');      % Target Regressor
 
 %% Regressor Symbolization 
 
+disp('Symb');
+
 [orgs,prbs] = ordin(rgs,cpis);
 [orgh,prbh] = ordin(rgh,cpih);
 [orgp,prbp] = ordin(rgp,cpip);
@@ -73,7 +100,11 @@ cfgs = prbs(1,:);
 cfgh = prbh(1,:);
 cfgp = prbp(1,:);
 
+disp('done');
+
 %% Ordinal Entropy Calculation
+
+disp('Ord Ent');
 
 % Marginal Entropies
 e_h = genent(prbh(3,:));
@@ -83,21 +114,34 @@ e_s = genent(prbs(3,:));
 % Binary Entropies
 be_ph = binent([orgp;orgh],{cfgp,cfgh},max([cpip,cpih]));
 be_sh = binent([orgs;orgh],{cfgs,cfgh},max([cpis,cpih]));
-be_ps = binent([orgp;orgs],{cfgp,cfgs},max([cpip,cpis]));
+% be_ps = binent([orgp;orgs],{cfgp,cfgs},max([cpip,cpis]));
 
 % Ternary Entropies
 te_shp = ternent([orgs;orgh;orgp],{cfgs,cfgh,cfgp},max([cpis,cpih,cpip]));
 
 % Mutual Information
-mi = e_s + e_p - be_ps;
+%mi = e_s + e_p - be_ps;
 
 % Transfer Entropy
-transf_ent =  be_ph + be_sh - te_shp - e_h; 
+tnsf(i) = be_ph + be_sh - te_shp - e_h; 
 
-te_v(i) = transf_ent;
-te_sd(i) = std(te_v);
-disp(i);
+
+%     if i == 1
+%         TRANSFER_ENTROPY = tnsf;
+%     elseif i == 2
+%         TRANSFER_ENTROPY_SHUFFLED = tnsf;
+%     end
+% te_v(i) = transf_ent;
+% te_sd(i) = std(te_v);
+% disp(i);
+% end
+
+disp('done');
 end
+
+
+disp('complete');
+plot(tnsf);
 
 
 %% Notes
