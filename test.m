@@ -7,23 +7,16 @@ fid = open(strcat(pwd,'/Wsdat/angs4_875_2.mat'));
 angs = fid.angt;
 s = 4;
 tm = zeros(s^2);
-randt = zeros(1,10);
-for j = 1:10
-%% 
-disp(j);
+
+
+parfor 
 
 %% Data Preprocessing
 
-tgt = angs(3,3001:8000); %(3001:8000);
-src = angs(4,3001:8000); %(3001:8000);
-% a = (.001*pi:.001*pi:4*pi);
-% b = ones(1,4000);
-% tgt = awgn(sin(a),45);
-% src = awgn(b,45);
+tgt = angs(3,:); 
+src = angs(4,:); 
 
 %% Thresholds and Characteristics
-
-% disp('TC');
 
 thr = 1e-4;                 % General convergence threshold
 r = 12;                     % FNN ratio threshold
@@ -31,12 +24,16 @@ nt = length(tgt);             % Number of data points
 
 %% Shuffling 
 
-tgt = tgt(randperm(nt));
-src = src(randperm(nt));
+shuffle = 'off';
 
+switch shuffle
+    case 'on'
+        tgt = tgt(randperm(nt));
+        src = src(randperm(nt));
+end
+       
 
 %% Regressor Characterization
-
 
 % Target History
 tauh = optau(tgt,thr);
@@ -59,87 +56,22 @@ rgs = regr(src,ms,taus,'FNN');      % Target Regressor
 
 %% Regressor Symbolization 
 
-[orgs,prbs] = ordin(rgs,cpis);
-[orgh,prbh] = ordin(rgh,cpih);
-[orgp,prbp] = ordin(rgp,cpip);
+[orgs,~] = ordin(rgs,cpis);
+[orgh,~] = ordin(rgh,cpih);
+[orgp,~] = ordin(rgp,cpip);
 
-cfgs = prbs(1,:);
-cfgh = prbh(1,:);
-cfgp = prbp(1,:);
+%% Entropy Calculation
 
-%%
-org = orgh(cpih+1:end);
-[states1,~,c] = unique(org);
-cnt = accumarray(c,1);
-prob = cnt/(nt-cpih);
-menh = 0;
+uenh = uni(orgh,cpih);
+bensh = bin([orgs;orgh],max(cpis,cpih));
+benph = bin([orgp;orgh],max(cpip,cpih));
+ten = tern([orgs;orgh;orgp],max([cpis,cpih,cpip]));
 
-for i = 1:length(prob)
-    menh = menh - prob(i)*log(prob(i));
-end
-%%
-max_cpi = max(cpis,cpih);
-org2 = [orgs;orgh]';
-org2 = org2(max_cpi+1:end,:);
-[states21,~,c] = unique(org2,'rows');
-cnt = accumarray(c,1);
-
-prob = cnt/(nt-max_cpi);
-bensh = 0;
-for i = 1:length(prob)
-    bensh = bensh - prob(i)*log(prob(i));
-end
-
-%%
-max_cpi = max(cpip,cpih);
-org2 = [orgp;orgh]';
-org2 = org2(max_cpi+1:end,:);
-[states22,~,c] = unique(org2,'rows');
-cnt = accumarray(c,1);
-
-prob = cnt/(nt-max_cpi);
-benph = 0;
-for i = 1:length(prob)
-    benph = benph - prob(i)*log(prob(i));
-end
+transfer = bensh + benph - ten - uenh;
+transfer_norm = transfer / benph;
 
 
-%%
-max_cpi = max([cpis,cpih,cpip]);
-org3 = [orgs;orgh;orgp]';
-org3 = org3(max_cpi+1:end,:);
-[states3,~,c] = unique(org3,'rows');
 
-cnt = accumarray(c,1);
-prob = cnt/(nt-max_cpi);
-ten = 0;
-for i = 1:length(prob)
-    ten = ten - prob(i)*log(prob(i));
-end
-
-%%
-transfer = bensh + benph - ten - menh;
-randt(j) = transfer;
-end
-%% Ordinal Entropy Calculation
-
-% % Marginal Entropies
-% e_h = genent(prbh(3,:));
-% e_p = genent(prbp(3,:));
-% e_s = genent(prbs(3,:));
-% 
-% % Binary Entropies
-% be_ph = binent([orgp;orgh],cfgp,max([cpip,cpih]));
-% be_sh = binent([orgs;orgh],cfgs,max([cpis,cpih]));
-% 
-% % Ternary Entropies
-% te_shp = ternent([orgs;orgh;orgp],cfgs,max([cpis,cpih,cpip]));
-% 
-% % Transfer Entropy
-% tnsf = be_ph + be_sh - te_shp - e_h; 
-% 
-% 
-% disp('complete');
 
 %% Notes
 
