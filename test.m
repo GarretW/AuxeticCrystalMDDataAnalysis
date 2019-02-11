@@ -2,71 +2,41 @@ clear; close all;
 
 %% Raw Data 
 % Data series setting
-%   Knight: Knight pattern.
-%   Cross: Cross matrix.
 
-% RESTRUCTURE FOR FULL DATA SET
-data = 'Knight';
-
-if strcmp(data,'Cross')
-    fid = open(strcat(pwd,'/Wsdat/angdat3377.mat'));
-    angs = fid.angdat(2:end,2:end); 
-elseif strcmp(data,'Knight') 
-    fid = open(strcat(pwd,'/Wsdat/angdat121322.mat'));
-    angs = fid.angdat(2:end,2:end);
-elseif strcmp(data,'s10')
-    fid = open(strcat(pwd,'/Wsdat/s10.mat'));
-    angs = fid.angs{1};
-end
+fid = open(strcat(pwd,'/Wsdat/angs4_875_2.mat'));
+angs = fid.angt;
+s = 4;
+tm = zeros(s^2);
+randt = zeros(1,10);
+for j = 1:10
+%% 
+disp(j);
 
 %% Data Preprocessing
 
-tgt = angs{3}; %(3001:8000);
-src = angs{4}; %(3001:8000);
-
-a = (.001*pi:.001*pi:4*pi);
-b = ones(1,4000);
-
+tgt = angs(3,3001:8000); %(3001:8000);
+src = angs(4,3001:8000); %(3001:8000);
+% a = (.001*pi:.001*pi:4*pi);
+% b = ones(1,4000);
 % tgt = awgn(sin(a),45);
 % src = awgn(b,45);
 
 %% Thresholds and Characteristics
 
-disp('TC');
+% disp('TC');
 
 thr = 1e-4;                 % General convergence threshold
 r = 12;                     % FNN ratio threshold
-nt = length(a);             % Number of data points
+nt = length(tgt);             % Number of data points
 
-disp('done');
-
-% te_v = zeros(1,25);
-% te_sd = zeros(1,25);
-
-% parfor i = 1:25
-
-tnsf = zeros(1,4);
-
-for i = 1:4
 %% Shuffling 
 
-% if i == 2
-% tgt = tgt(randperm(nt));
-% src = src(randperm(nt));
+tgt = tgt(randperm(nt));
+src = src(randperm(nt));
 
-tgt = awgn(sin(a),60);
-src = awgn(b,60);
 
-disp(i);
-plot(tgt);
-hold on
-plot(src);
-%pause;
-hold off
-%close all
 %% Regressor Characterization
 
-disp('Reg');
 
 % Target History
 tauh = optau(tgt,thr);
@@ -87,10 +57,7 @@ cpis = ms*taus;
 rgs = regr(src,ms,taus,'FNN');      % Target Regressor
 
 
-
 %% Regressor Symbolization 
-
-disp('Symb');
 
 [orgs,prbs] = ordin(rgs,cpis);
 [orgh,prbh] = ordin(rgh,cpih);
@@ -100,49 +67,79 @@ cfgs = prbs(1,:);
 cfgh = prbh(1,:);
 cfgp = prbp(1,:);
 
-disp('done');
+%%
+org = orgh(cpih+1:end);
+[states1,~,c] = unique(org);
+cnt = accumarray(c,1);
+prob = cnt/(nt-cpih);
+menh = 0;
 
-%% Ordinal Entropy Calculation
+for i = 1:length(prob)
+    menh = menh - prob(i)*log(prob(i));
+end
+%%
+max_cpi = max(cpis,cpih);
+org2 = [orgs;orgh]';
+org2 = org2(max_cpi+1:end,:);
+[states21,~,c] = unique(org2,'rows');
+cnt = accumarray(c,1);
 
-disp('Ord Ent');
+prob = cnt/(nt-max_cpi);
+bensh = 0;
+for i = 1:length(prob)
+    bensh = bensh - prob(i)*log(prob(i));
+end
 
-% Marginal Entropies
-e_h = genent(prbh(3,:));
-e_p = genent(prbp(3,:));
-e_s = genent(prbs(3,:));
+%%
+max_cpi = max(cpip,cpih);
+org2 = [orgp;orgh]';
+org2 = org2(max_cpi+1:end,:);
+[states22,~,c] = unique(org2,'rows');
+cnt = accumarray(c,1);
 
-% Binary Entropies
-be_ph = binent([orgp;orgh],{cfgp,cfgh},max([cpip,cpih]));
-be_sh = binent([orgs;orgh],{cfgs,cfgh},max([cpis,cpih]));
-% be_ps = binent([orgp;orgs],{cfgp,cfgs},max([cpip,cpis]));
-
-% Ternary Entropies
-te_shp = ternent([orgs;orgh;orgp],{cfgs,cfgh,cfgp},max([cpis,cpih,cpip]));
-
-% Mutual Information
-%mi = e_s + e_p - be_ps;
-
-% Transfer Entropy
-tnsf(i) = be_ph + be_sh - te_shp - e_h; 
-
-
-%     if i == 1
-%         TRANSFER_ENTROPY = tnsf;
-%     elseif i == 2
-%         TRANSFER_ENTROPY_SHUFFLED = tnsf;
-%     end
-% te_v(i) = transf_ent;
-% te_sd(i) = std(te_v);
-% disp(i);
-% end
-
-disp('done');
+prob = cnt/(nt-max_cpi);
+benph = 0;
+for i = 1:length(prob)
+    benph = benph - prob(i)*log(prob(i));
 end
 
 
-disp('complete');
-plot(tnsf);
+%%
+max_cpi = max([cpis,cpih,cpip]);
+org3 = [orgs;orgh;orgp]';
+org3 = org3(max_cpi+1:end,:);
+[states3,~,c] = unique(org3,'rows');
 
+cnt = accumarray(c,1);
+prob = cnt/(nt-max_cpi);
+ten = 0;
+for i = 1:length(prob)
+    ten = ten - prob(i)*log(prob(i));
+end
+
+%%
+transfer = bensh + benph - ten - menh;
+randt(j) = transfer;
+end
+%% Ordinal Entropy Calculation
+
+% % Marginal Entropies
+% e_h = genent(prbh(3,:));
+% e_p = genent(prbp(3,:));
+% e_s = genent(prbs(3,:));
+% 
+% % Binary Entropies
+% be_ph = binent([orgp;orgh],cfgp,max([cpip,cpih]));
+% be_sh = binent([orgs;orgh],cfgs,max([cpis,cpih]));
+% 
+% % Ternary Entropies
+% te_shp = ternent([orgs;orgh;orgp],cfgs,max([cpis,cpih,cpip]));
+% 
+% % Transfer Entropy
+% tnsf = be_ph + be_sh - te_shp - e_h; 
+% 
+% 
+% disp('complete');
 
 %% Notes
 
