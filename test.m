@@ -6,16 +6,23 @@ clear; close all;
 fid = open(strcat(pwd,'/Wsdat/angs4_875_2.mat'));
 angs = fid.angt;
 s = 4;
-tm = zeros(s^2);
+%tm = zeros(s^2);    % Transfer Matrix
+sv = zeros(1,100);  % Shuffle Vector
+%sm = zeros(s^2);    % Shuffle Matrix
+%%
 
+%for i = 1:4
+%    for j = 1:4
+%% Data Preprocessing 
 
-parfor 
+%disp(i);
+%disp(j);
 
-%% Data Preprocessing
-
-tgt = angs(3,:); 
-src = angs(4,:); 
-
+%tgt = angs(i,1:5000);  
+%src = angs(j,1:5000); 
+x = 0:0.001*pi:2*pi-0.001*pi;
+tgt = sin(x);
+src = 2*sin(x) + pi/16;
 %% Thresholds and Characteristics
 
 thr = 1e-4;                 % General convergence threshold
@@ -24,8 +31,14 @@ nt = length(tgt);             % Number of data points
 
 %% Shuffling 
 
-shuffle = 'off';
+    for k = 1:101
+        disp(k);
+shuffle = 'on';
 
+if k == 1
+    shuffle = 'off';
+end
+    
 switch shuffle
     case 'on'
         tgt = tgt(randperm(nt));
@@ -70,10 +83,23 @@ ten = tern([orgs;orgh;orgp],max([cpis,cpih,cpip]));
 transfer = bensh + benph - ten - uenh;
 transfer_norm = transfer / benph;
 
+if k == 1
+%tm(i,j) = transfer_norm;
+a = transfer_norm;
+else 
+    sv(k-1) = transfer_norm;
+end
 
 
-
+    end
+    
+    %sm(i,j) = mean(sv);
+    b = mean(sv);
+    
+    %end
+%end
 %% Notes
+
 
 % 10/21: 
 %       Pursue Bandt-Pompf method 
