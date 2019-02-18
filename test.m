@@ -6,45 +6,34 @@ clear; close all;
 fid = open(strcat(pwd,'/Wsdat/angs4_875_2.mat'));
 angs = fid.angt;
 s = 4;
-%tm = zeros(s^2);    % Transfer Matrix
 sv = zeros(1,100);  % Shuffle Vector
-%sm = zeros(s^2);    % Shuffle Matrix
-%%
 
-%for i = 1:4
-%    for j = 1:4
 %% Data Preprocessing 
 
 %disp(i);
 %disp(j);
 
-%tgt = angs(i,1:5000);  
-%src = angs(j,1:5000); 
-x = 0:0.001*pi:2*pi-0.001*pi;
-tgt = sin(x);
-src = 2*sin(x) + pi/16;
+tgt = angs(6,1:5000);  
+src = angs(7,1:5000); 
+% x = 0:0.001*pi:2*pi-0.001*pi;
+% tgt = sin(x);
+% src = 2*sin(x) + pi/16;
 %% Thresholds and Characteristics
 
 thr = 1e-4;                 % General convergence threshold
 r = 12;                     % FNN ratio threshold
-nt = length(tgt);             % Number of data points
+nt = length(tgt);           % Number of data points
 
 %% Shuffling 
-
-    for k = 1:101
-        disp(k);
-shuffle = 'on';
-
-if k == 1
-    shuffle = 'off';
-end
-    
-switch shuffle
-    case 'on'
-        tgt = tgt(randperm(nt));
-        src = src(randperm(nt));
-end
-       
+   
+% shuffle = 'on';
+% 
+% if k == 1
+%     shuffle = 'off';
+% elseif k > 1
+%     tgt = tgt(randperm(nt));
+%     src = src(randperm(nt));
+% end           
 
 %% Regressor Characterization
 
@@ -82,22 +71,8 @@ ten = tern([orgs;orgh;orgp],max([cpis,cpih,cpip]));
 
 transfer = bensh + benph - ten - uenh;
 transfer_norm = transfer / benph;
-
-if k == 1
-%tm(i,j) = transfer_norm;
-a = transfer_norm;
-else 
-    sv(k-1) = transfer_norm;
-end
-
-
-    end
-    
-    %sm(i,j) = mean(sv);
-    b = mean(sv);
-    
-    %end
-%end
+      
+[transfer2, transfer_norm2] = trans(tgt,src,thr,r);
 %% Notes
 
 
@@ -129,8 +104,14 @@ end
 %   Directionality coefficient normalized by H(Xp|Xh)
 %   Implement parallel computation
 %   Determine transfer entropy symmetry or inversion from target and source
-%   Investigate the nessicary degree of conditioning for other influencing variables.
+%   Investigate the nessicary degree of conditioning for other influencvariables.
 %   Investigate trends in spurious biases: Location of squares in lattice, distance of
 %       variable pairs, inversion of target and source, etc...
 
+% 2/15
+%   How to deal with statistical sample 
+%   Relate initial conditions to neural 
+%   Processing with GPU
+%   Significance of shuffling and static correlations in our data
+%   Chanign time steps and shuffles 
 
