@@ -1,8 +1,5 @@
 function [transfer, transfer_norm] = trans(tgt,src,thr,r)
-%% TRANS Transfer Entropy Calculation
-% 
-%
-%
+%% TRANS Transfer Entropy Calculation 
 
 %% Regressor Characterization
 

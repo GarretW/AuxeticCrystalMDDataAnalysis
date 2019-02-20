@@ -10,14 +10,8 @@ sv = zeros(1,100);  % Shuffle Vector
 
 %% Data Preprocessing 
 
-%disp(i);
-%disp(j);
-
 tgt = angs(6,1:5000);  
 src = angs(7,1:5000); 
-% x = 0:0.001*pi:2*pi-0.001*pi;
-% tgt = sin(x);
-% src = 2*sin(x) + pi/16;
 %% Thresholds and Characteristics
 
 thr = 1e-4;                 % General convergence threshold
@@ -58,21 +52,23 @@ rgs = regr(src,ms,taus,'FNN');      % Target Regressor
 
 %% Regressor Symbolization 
 
-[orgs,~] = ordin(rgs,cpis);
-[orgh,~] = ordin(rgh,cpih);
-[orgp,~] = ordin(rgp,cpip);
+% [orgs,~] = ordin(rgs,cpis);
+% [orgh,~] = ordin(rgh,cpih);
+% [orgp,~] = ordin(rgp,cpip);
 
 %% Entropy Calculation
-
-uenh = uni(orgh,cpih);
-bensh = bin([orgs;orgh],max(cpis,cpih));
-benph = bin([orgp;orgh],max(cpip,cpih));
-ten = tern([orgs;orgh;orgp],max([cpis,cpih,cpip]));
-
-transfer = bensh + benph - ten - uenh;
-transfer_norm = transfer / benph;
-      
-[transfer2, transfer_norm2] = trans(tgt,src,thr,r);
+% 
+% uenh = uni(orgh,cpih);
+% bensh = bin([orgs;orgh],max(cpis,cpih));
+% benph = bin([orgp;orgh],max(cpip,cpih));
+% ten = tern([orgs;orgh;orgp],max([cpis,cpih,cpip]));
+% 
+% mi = uni(orgh,cpih) + uni(orgs,cpis) - bin([orgs;orgh],max(cpis,cpih));
+% 
+% transfer = bensh + benph - ten - uenh;
+% transfer_norm = transfer / benph;
+%      
+%[transfer2, transfer_norm2] = trans(tgt,src,thr,r);
 %% Notes
 
 
@@ -109,9 +105,14 @@ transfer_norm = transfer / benph;
 %       variable pairs, inversion of target and source, etc...
 
 % 2/15
-%   How to deal with statistical sample 
+%   How to deal with statistical sample - GPU Paper 
 %   Relate initial conditions to neural 
 %   Processing with GPU
 %   Significance of shuffling and static correlations in our data
 %   Chanign time steps and shuffles 
+%
+%
+% 2/17
+%   Fix embedding parameters for shuffling 
+%   Quantification in TE J Comput Neurosci
 
