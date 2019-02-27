@@ -3,52 +3,77 @@ clear; close all;
 %% Raw Data 
 % Data series setting
 
-fid = open(strcat(pwd,'/Wsdat/angs4_875_2.mat'));
-angs = fid.angt;
-s = 4;
-sv = zeros(1,100);  % Shuffle Vector
-
-%% Data Preprocessing 
-
-tgt = angs(6,1:5000);  
-src = angs(7,1:5000); 
+fid = open(strcat(pwd,'/Wsdat/s10l68.mat'));
+data = fid.angs;
+% fid = open('lit1.mat');
+% angs = fid.fid.data;
 %% Thresholds and Characteristics
 
 thr = 1e-4;                 % General convergence threshold
 r = 12;                     % FNN ratio threshold
-nt = length(tgt);           % Number of data points
+%nt = length(tgt);           % Number of data points
+nt = length(data);          % Number of initial conditions
+%% Data Preprocessing 
+
+ict = zeros(nt,10000); ics = ict; 
+
+for i = 1:nt
+    ic = data{i};
+    ict(i,:) = ic(1,:); 
+    ics(i,:) = ic(2,:);
+end
+
+time = zeros(1,10);
+%terv = cell(1,10);
+
+
+ictt = ict(:,3001:3500+(x*500)); icst = ics(:,3001:3500+(x*500));
+
+ter = cell(1,50);
+
+%tic;
+
+for i = 1:50
+    randt = randi([1,nt],[1,1]); rands = randi([1,nt],[1,1]);    
+    tgt = ictt(randt,:); src = icst(rands,:);
+    
+    disp(['Trial: ' num2str(i) ' ;ICT: ' num2str(randt) ' ;ICS: ' num2str(rands)]);
+    
+    [transf,transf_n] =  trans(tgt,src,thr,r);
+    ter{i} = [transf; transf_n; randt; rands]; 
+end
+%disp(['Calculation: ' num2str(x) ' done.']);
+%time(x) = toc;
+%terv{x} = ter{i};
+        
 
 %% Shuffling 
    
 % shuffle = 'on';
-% 
-% if k == 1
-%     shuffle = 'off';
-% elseif k > 1
-%     tgt = tgt(randperm(nt));
-%     src = src(randperm(nt));
-% end           
+% tgt = tgt(randperm(nt));
+% src = src(randperm(nt));
+
 
 %% Regressor Characterization
 
-% Target History
-tauh = optau(tgt,thr);
-mh = opdim(tgt,tauh,r,thr);
-cpih = mh*tauh;
-rgh = regr(tgt,mh,tauh,'FNN');      % History Regressor
-
-% Target Present
-taup = tauh;
-mp = mh;
-cpip = (mp+1)*taup;
-rgp = regr(tgt,mp,tauh,'BP');       % Present Regressor
-
-% Source 
-taus = optau(src,thr);
-ms = opdim(src,taus,r,thr);
-cpis = ms*taus;
-rgs = regr(src,ms,taus,'FNN');      % Target Regressor
-
+% % Target History
+% tauh = optau(tgt,thr);
+% mh = opdim(tgt,tauh,r,thr);
+% cpih = mh*tauh;
+% rgh = regr(tgt,mh,tauh,'FNN');      % History Regressor
+% 
+% % Target Present
+% taup = tauh;
+% mp = mh;
+% cpip = (mp+1)*taup;
+% rgp = regr(tgt,mp,tauh,'BP');       % Present Regressor
+% 
+% % Source 
+% taus = optau(src,thr);
+% ms = opdim(src,taus,r,thr);
+% cpis = ms*taus;
+% rgs = regr(src,ms,taus,'FNN');      % Target Regressor
+% 
 
 %% Regressor Symbolization 
 
@@ -57,7 +82,7 @@ rgs = regr(src,ms,taus,'FNN');      % Target Regressor
 % [orgp,~] = ordin(rgp,cpip);
 
 %% Entropy Calculation
-% 
+
 % uenh = uni(orgh,cpih);
 % bensh = bin([orgs;orgh],max(cpis,cpih));
 % benph = bin([orgp;orgh],max(cpip,cpih));
@@ -66,9 +91,7 @@ rgs = regr(src,ms,taus,'FNN');      % Target Regressor
 % mi = uni(orgh,cpih) + uni(orgs,cpis) - bin([orgs;orgh],max(cpis,cpih));
 % 
 % transfer = bensh + benph - ten - uenh;
-% transfer_norm = transfer / benph;
-%      
-%[transfer2, transfer_norm2] = trans(tgt,src,thr,r);
+% transfer_norm = transfer / benph;      
 %% Notes
 
 
